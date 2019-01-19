@@ -28,27 +28,20 @@ from tulip import tlp
 # The main(graph) function must be defined 
 # to run the script on the current graph
 
-def hierarchique(tree, root, cluster_courant):
-  return 0
-  
-  
 
-def main(graph): 
-  
+def preprocessing(graph):
   viewLabel = graph.getStringProperty("viewLabel")
   viewColor = graph.getColorProperty("viewColor")
   viewSize = graph.getIntegerProperty("size of nodes")
   green = tlp.Color(0,255,0)
   red = tlp.Color(255,0,0)
   size=100
-  #TODO scene color
-
   for n in graph.getNodes():
     properties = graph.getNodePropertiesValues(n)
     locus_name = properties["locus"]
     viewLabel[n] = locus_name
     viewSize[n] = size
-
+    
   for e in graph.getEdges():
     properties = graph.getEdgePropertiesValues(e)
     if (properties["Positive"] == True ) :
@@ -58,11 +51,32 @@ def main(graph):
       
 
   
-  root_cluster = graph.getSubGraph("Genes interactions")
-  new = graph.addSubGraph("new")
-  hierarchique(new, root_cluster, cluster)
+
+def draw_hierarchical_tree(tree, root, current_cluster):
+  current_node = tree.addNode()
+  tree.addEdge(root,current_node) 
+  for cluster in current_cluster.getSubGraphs():
+    draw_hierarchical_tree(tree, current_node, cluster)
+  if len(list(current_cluster.getSubGraphs())) == 0 :
+    print "coucou"
+    for n in current_cluster.getNodes():
+      node = tree.addNode()
+      tree.addEdge(root, node)
   
-    
+
+def main(graph): 
+  
+  #TODO scene color
+
+  preprocessing(graph)
+  
+  root_cluster = graph.getSubGraph("Genes interactions")
+  hierarchical_tree = graph.addSubGraph("hierarchical_graph")
+  
+  root = hierarchical_tree.addNode({"name":"root"})
+  for cluster in root_cluster.getSubGraphs():
+    draw_hierarchical_tree(hierarchical_tree, root, cluster)
+
 
   
   
