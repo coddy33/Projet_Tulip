@@ -53,20 +53,32 @@ def preprocessing(graph):
   
 
 def draw_hierarchical_tree(tree, root, current_cluster):
-  current_node = tree.addNode()
-  tree.addEdge(root,current_node) 
+
   for cluster in current_cluster.getSubGraphs():
+    current_node = tree.addNode()
+    tree.addEdge(root,current_node) 
     draw_hierarchical_tree(tree, current_node, cluster)
   if len(list(current_cluster.getSubGraphs())) == 0 :
-    print "coucou"
-    for n in current_cluster.getNodes():
-      node = tree.addNode()
-      tree.addEdge(root, node)
+      for n in current_cluster.getNodes():
+        node = tree.addNode()
+        tree.addEdge(root, node)
   
+  
+
+def apply_radial_algorithm(gr):
+  viewSize = graph.getIntegerProperty("size of nodes")
+  params = tlp.getDefaultPluginParameters("Tree Radial", gr)
+  params["layer spacing"] = 64
+  params["node spacing"] = 18
+  params["node size"] = viewSize
+  graph.applyLayoutAlgorithm("Tree Radial")
+
+  return 0
+
 
 def main(graph): 
   
-  #TODO scene color
+  #TODO scene color = white
 
   preprocessing(graph)
   
@@ -74,8 +86,11 @@ def main(graph):
   hierarchical_tree = graph.addSubGraph("hierarchical_graph")
   
   root = hierarchical_tree.addNode({"name":"root"})
-  for cluster in root_cluster.getSubGraphs():
-    draw_hierarchical_tree(hierarchical_tree, root, cluster)
+#  for cluster in root_cluster.getSubGraphs():
+  draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
+    
+    
+  apply_radial_algorithm(graph)
 
 
   
