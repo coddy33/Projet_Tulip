@@ -53,7 +53,6 @@ def preprocessing(graph):
   
 
 def draw_hierarchical_tree(tree, root, current_cluster):
-
   for cluster in current_cluster.getSubGraphs():
     current_node = tree.addNode()
     tree.addEdge(root,current_node) 
@@ -66,12 +65,11 @@ def draw_hierarchical_tree(tree, root, current_cluster):
   
 
 def apply_radial_algorithm(gr):
-  viewSize = graph.getIntegerProperty("size of nodes")
+  viewLayout = gr.getLayoutProperty("viewLayout")
   params = tlp.getDefaultPluginParameters("Tree Radial", gr)
   params["layer spacing"] = 64
   params["node spacing"] = 18
-  params["node size"] = viewSize
-  graph.applyLayoutAlgorithm("Tree Radial")
+  gr.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
 
   return 0
 
@@ -90,7 +88,7 @@ def main(graph):
   draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
     
     
-  apply_radial_algorithm(graph)
+  apply_radial_algorithm(hierarchical_tree)
 
 
   
