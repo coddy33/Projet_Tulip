@@ -13,6 +13,7 @@
 #   * Ctrl + R  : replace selected text.
 #   * Ctrl + Space  : show auto-completion dialog.
 
+# -*- coding: utf-8 -*-
 from tulip import tlp
 
 # The updateVisualization(centerViews = True) function can be called
@@ -71,8 +72,19 @@ def apply_radial_algorithm(gr):
   params["node spacing"] = 18
   gr.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
 
-  return 0
-
+def compute_path(gr, u, v):
+#   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
+  queue = []
+  queue.append ([u])
+  while queue :
+    path = queue.pop(0)
+    node = path[-1]
+    if node == v:
+      return path
+    for adjacent in gr.getInOutNodes(node):
+      new_path = list(path)
+      new_path.append(adjacent)
+      queue.append(new_path)
 
 def main(graph): 
   
@@ -84,12 +96,12 @@ def main(graph):
   hierarchical_tree = graph.addSubGraph("hierarchical_graph")
   
   root = hierarchical_tree.addNode({"name":"root"})
-#  for cluster in root_cluster.getSubGraphs():
   draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
-    
-    
+  
   apply_radial_algorithm(hierarchical_tree)
-
+  
+  
+  print compute_path(hierarchical_tree, root, hierarchical_tree.getRandomNode())
 
   
   
