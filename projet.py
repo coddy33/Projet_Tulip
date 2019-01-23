@@ -30,28 +30,26 @@ from tulip import tlp
 # to run the script on the current graph
 
 
-def preprocessing(graph):
-  viewLabel = graph.getStringProperty("viewLabel")
-  viewColor = graph.getColorProperty("viewColor")
-  viewSize = graph.getIntegerProperty("size of nodes")
+def preprocessing(gr, viewColor):
+  viewLabel = gr.getStringProperty("viewLabel")
+  LabelPosition = gr.getIntegerProperty("viewLabelPosition")
+  viewSize = gr.getIntegerProperty("size of nodes")
   green = tlp.Color(0,255,0)
   red = tlp.Color(255,0,0)
   size=100
   for n in graph.getNodes():
-    properties = graph.getNodePropertiesValues(n)
+    properties = gr.getNodePropertiesValues(n)
     locus_name = properties["locus"]
     viewLabel[n] = locus_name
     viewSize[n] = size
-    
-  for e in graph.getEdges():
-    properties = graph.getEdgePropertiesValues(e)
+    LabelPosition[n] = tlp.LabelPosition.Center
+  for e in gr.getEdges():
+    properties = gr.getEdgePropertiesValues(e)
     if (properties["Positive"] == True ) :
       viewColor[e] = green
     else :
       viewColor[e] = red
-      
 
-  
 
 def draw_hierarchical_tree(tree, root, current_cluster):
   for cluster in current_cluster.getSubGraphs():
@@ -59,23 +57,24 @@ def draw_hierarchical_tree(tree, root, current_cluster):
     tree.addEdge(root,current_node) 
     draw_hierarchical_tree(tree, current_node, cluster)
   if len(list(current_cluster.getSubGraphs())) == 0 :
-      for n in current_cluster.getNodes():
-        node = tree.addNode()
-        tree.addEdge(root, node)
+    for n in current_cluster.getNodes():
+      node = tree.addNode()
+      tree.addEdge(root, node)
   
   
 
-def apply_radial_algorithm(gr):
-  viewLayout = gr.getLayoutProperty("viewLayout")
+def apply_radial_algorithm(gr, root_cluster,viewLayout):
   params = tlp.getDefaultPluginParameters("Tree Radial", gr)
   params["layer spacing"] = 64
   params["node spacing"] = 18
   gr.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
+#  root_cluster.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
+
 
 def compute_path(gr, u, v):
 #   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
   queue = []
-  queue.append ([u])
+  queue.append([u])
   while queue :
     path = queue.pop(0)
     node = path[-1]
@@ -86,11 +85,20 @@ def compute_path(gr, u, v):
       new_path.append(adjacent)
       queue.append(new_path)
 
-def main(graph): 
-  
-  #TODO scene color = white
+def draw_bundles(gr):
+  viewShape = graph.getIntegerProperty("viewShape")
+  for e in gr.getEdges():
+    viewShape[e] = tlp.EdgeShape.BezierCurve
+    
 
-  preprocessing(graph)
+def main(graph): 
+  #TODO scene color = white
+  tlp.LabelPosition.Center
+
+  viewLayout = graph.getLayoutProperty("viewLayout")
+  viewColor = graph.getColorProperty("viewColor")
+
+  preprocessing(graph, viewColor)
   
   root_cluster = graph.getSubGraph("Genes interactions")
   hierarchical_tree = graph.addSubGraph("hierarchical_graph")
@@ -98,10 +106,22 @@ def main(graph):
   root = hierarchical_tree.addNode({"name":"root"})
   draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
   
-  apply_radial_algorithm(hierarchical_tree)
+  apply_radial_algorithm(hierarchical_tree, root_cluster,viewLayout)
   
   
-  print compute_path(hierarchical_tree, root, hierarchical_tree.getRandomNode())
+  
+  A = hierarchical_tree.getRandomNode()
+  path = compute_path(hierarchical_tree, root, A )
+  print path
+  new = graph.addSubGraph("new")
+  
+  
+  updateVisualization(centerViews = True)
+  
+  
+#  print hierarchical_tree.existEdge(path[0],path[2]) # retourne <edge 4294967295> si l'edge existe pas
 
+#  bundles = graph.getSubGraph("Bundles")
+#  4294967295
   
   
