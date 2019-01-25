@@ -129,8 +129,7 @@ def find_path(L1, L2):
 #  for i in rangelen(L1):
 #    for j in range(len(L2) : 
 #      if L1[i] != L2[j] :
-#        
-  
+#          
   doublons = []
   for i in range(len(L1)) : 
     for j in range(len(L2)):
@@ -138,14 +137,20 @@ def find_path(L1, L2):
         doublons.append(L1[i])
         L2.pop(j)
         break
-  
   del doublons[0]
-  for j in doublons:
-    print doublons[j]
+  for j in range(len(doublons)):
     L1.remove(doublons[j])
       
   L2.reverse()
-  print L1 + L2    
+  return L1 + L2    
+  
+def find_path2(gr, node, position):
+  #TODO enlever position en argument -> Fredo
+  if gr.getInNodes(node) > 0 :
+    position.append(node)
+    for n in gr.getInNodes(node):
+      find_path2(gr, n, position)
+  
 
 #  L2.reverse()
 #  path = L1 + L2
@@ -187,12 +192,15 @@ def compute_path2(tree, source, target):
 
 
 def draw_bundles(gene, tree):
+  viewLayout_interraction = gene.getLayoutProperty("viewLayout")
   for e in gene.getEdges():
     source = gene.source(e)
     target = gene.target(e)
-    path = compute_path(tree, source, target)
-    print path 
-
+    L1 = []
+    find_path2(tree, source, L1)
+    L2 = []
+    find_path2(tree, target, L2)
+    find_path(L1,L2)
 
 
 #  viewLayout_hierarchical = hierarchical_graph.getLayoutProperty("viewLayout")
@@ -207,13 +215,14 @@ def draw_bundles(gene, tree):
 #    	viewShape[e] = tlp.EdgeShape.BezierCurve
 #    
 #    
-#def control_points(viewLayout_hierarchical, viewLayout_interraction, path, e):
+
+#def set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e):
 #  position_vector = []
 #  for n in path :
 #    position_vector.append(viewLayout_hierarchical[n])
 #  viewLayout_interraction.setEdgeValue(e, position_vector)
 #  print position_vector
-
+#
 
 
 
@@ -234,18 +243,14 @@ def main(graph):
   
   apply_radial_algorithm(hierarchical_tree,viewLayout)
   
+
+
+  draw_bundles( root_cluster, hierarchical_tree)
+  
   updateVisualization(centerViews = True)
 
-
-#  draw_bundles( root_cluster, hierarchical_tree)
   
-  A = root_cluster.getRandomNode()
-  B = root_cluster.getRandomNode()
-
-  L1 = [12,20,24,2,30,0]
-  L2 = [9,14,17,30,0]
-  
-  find_path(L1,L2)
+#  print find_path(L1,L2)
 
 #  print compute_path2(hierarchical_tree, A, B)
 
