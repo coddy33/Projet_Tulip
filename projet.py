@@ -111,7 +111,79 @@ This function allows to recover the path (nodes) which separate two nodes
       new_path.append(adjacent)
       queue.append(new_path)
 
+def find_clusters(gr):
+  viewLabel = gr.getStringProperty("viewLabel")
+  clusters = []
+  for n in gr.getNodes():
+    if viewLabel[n] == "" :
+      clusters.append(n)
+  return clusters
 
+#def find_path(tree, u, v, path, clusters):    
+#  for n in tree.getInOutNodes(u):
+#    if n in clusters and :
+#      
+#      
+
+def find_path(L1, L2):
+#  for i in rangelen(L1):
+#    for j in range(len(L2) : 
+#      if L1[i] != L2[j] :
+#        
+  
+  doublons = []
+  for i in range(len(L1)) : 
+    for j in range(len(L2)):
+      if L1[i] == L2[j]:
+        doublons.append(L1[i])
+        L2.pop(j)
+        break
+  
+  del doublons[0]
+  for j in doublons:
+    print doublons[j]
+    L1.remove(doublons[j])
+      
+  L2.reverse()
+  print L1 + L2    
+
+#  L2.reverse()
+#  path = L1 + L2
+#  lol = []
+#  tmp_path = []
+#  print path
+#  for i in range(len(path)):
+#    for j in range(len(path)) :
+#      if path[i] == path[j] and i != j :
+#        lol.append(path[i])
+#
+        
+#  for i in range(len(L1)):
+#    if L1[i] == path[i]:
+#      pass
+#    else : 
+#      path.insert(i, L1[i])
+#      return path
+        
+      
+
+
+
+def compute_path2(tree, source, target):
+  path = []
+  clusters = find_clusters(tree)
+  count =  0
+  for n in tree.getInOutNodes(source):
+    parent_source = n
+  for n in tree.getInOutNodes(target):
+    parent_target= n
+  path.append(parent_source)
+  find_path(tree, parent_source, parent_target, path, clusters)
+  path.append(parent_target)
+  return path
+    
+    
+      
 
 
 def draw_bundles(gene, tree):
@@ -164,10 +236,19 @@ def main(graph):
   
   updateVisualization(centerViews = True)
 
-  draw_bundles( root_cluster, hierarchical_tree)
+
+#  draw_bundles( root_cluster, hierarchical_tree)
   
-#  A = root_cluster.getRandomNode()
-#  B = root_cluster.getRandomNode()
+  A = root_cluster.getRandomNode()
+  B = root_cluster.getRandomNode()
+
+  L1 = [12,20,24,2,30,0]
+  L2 = [9,14,17,30,0]
+  
+  find_path(L1,L2)
+
+#  print compute_path2(hierarchical_tree, A, B)
+
 #  print A
 #  print B  
 #  print compute_path(hierarchical_tree, root, B)
