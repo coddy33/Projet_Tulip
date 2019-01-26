@@ -102,7 +102,7 @@ def apply_radial_algorithm(gr,viewLayout):
 def compute_path(gr, u, v):
 #   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
   """
-This function allows to recover the path (nodes) which separate two nodes 
+ This function allows to recover the path (nodes) which separate two nodes 
 
  @param gr : Tulip graph
  @ u : First node of interest
@@ -153,26 +153,6 @@ def find_path2(gr, node, position):
       find_path2(gr, n, position)
   
 
-#  L2.reverse()
-#  path = L1 + L2
-#  lol = []
-#  tmp_path = []
-#  print path
-#  for i in range(len(path)):
-#    for j in range(len(path)) :
-#      if path[i] == path[j] and i != j :
-#        lol.append(path[i])
-#
-        
-#  for i in range(len(L1)):
-#    if L1[i] == path[i]:
-#      pass
-#    else : 
-#      path.insert(i, L1[i])
-#      return path
-        
-      
-
 
 
 def compute_path2(tree, source, target):
@@ -214,26 +194,33 @@ def draw_bundles(gene, tree):
     path.pop()
     del path[0]
     set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
-#    viewShape[e] = tlp.EdgeShape.BezierCurve
-  viewShape.setAllEdgeValue(16)
+  viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
 
 
 #colorier les sommets (couleur à regler)
 def color_graph(gr,param,color):
   params = tlp.getDefaultPluginParameters("Color Mapping",gr)
   params["input property"] = param
-  print params #Voir a quoi ressemble la liste des couleurs
   params["minimum value"]=0
   params["maximum value"]=15
   #params["color scale"]=
   gr.applyColorAlgorithm("Color Mapping", color, params)
 
 
-
+def timePoint_hierarchy(nb_TP):
+  TPs = []
+  for i in range(nb_TP):
+    TP_name = "tp" + str(i+1) + " s"
+    TPs.append(TP_name)
+  return TPs
+  
+  
+def draw_timePoint_hierarchy(TPs, SM, gene):
+  for tp in TPs :
+    tmp = SM.addSubGraph(tp)
+    tlp.copyToGraph(tmp, gene)
 
 def main(graph): 
-  #TODO scene color = white
-
   viewLayout = graph.getLayoutProperty("viewLayout")
   viewColor = graph.getColorProperty("viewColor")
   param = graph.getDoubleProperty("tp1 s")
@@ -250,28 +237,17 @@ def main(graph):
   apply_radial_algorithm(hierarchical_tree,viewLayout)
   
 
-
   draw_bundles( root_cluster, hierarchical_tree)
   color_graph(root_cluster,param,viewColor)
+  
+  TPs = timePoint_hierarchy(17)
+  SM = graph.addSubGraph("Small multiples")
+  draw_timePoint_hierarchy(TPs, SM, root_cluster)
+
 
   updateVisualization(centerViews = True)
 
-  
-#  print find_path(L1,L2)
-
-#  print compute_path2(hierarchical_tree, A, B)
-
-#  print A
-#  print B  
-#  print compute_path(hierarchical_tree, root, B)
-  
-#  print hierarchical_tree.existEdge(path[0],path[2]) # retourne <edge 4294967295> si l'edge existe pas
-
-#  bundles = graph.getSubGraph("Bundles")
-#  4294967295
-  
-  
-  
+ 
   
   
   
