@@ -216,9 +216,16 @@ def timePoint_hierarchy(nb_TP):
   
   
 def draw_timePoint_hierarchy(TPs, SM, gene):
+  viewColor = graph.getColorProperty("viewColor")
   for tp in TPs :
     tmp = SM.addSubGraph(tp)
     tlp.copyToGraph(tmp, gene)
+    Metric = tmp.getDoubleProperty("viewMetric")
+    pr = tmp.getDoubleProperty(tp)
+    for n in tmp.getNodes():
+      properties = gr.getNodePropertiesValues(n)
+      Metric[n] = properties[tp]
+    color_graph(tmp, pr, viewColor)
 
 def main(graph): 
   viewLayout = graph.getLayoutProperty("viewLayout")
