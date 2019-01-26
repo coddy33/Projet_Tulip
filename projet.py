@@ -1,4 +1,14 @@
 # Powered by Python 2.7
+# -*- coding: utf-8 -*-
+
+"""
+BLAIS Benjamin
+JUNG Frédéric 
+
+Visual analysis of gene expression data
+
+01/26/2016
+"""
 
 # To cancel the modifications performed by the script
 # on the current graph, click on the undo button.
@@ -119,17 +129,8 @@ def find_clusters(gr):
       clusters.append(n)
   return clusters
 
-#def find_path(tree, u, v, path, clusters):    
-#  for n in tree.getInOutNodes(u):
-#    if n in clusters and :
-#      
-#      
 
-def find_path(L1, L2):
-#  for i in rangelen(L1):
-#    for j in range(len(L2) : 
-#      if L1[i] != L2[j] :
-#          
+def find_path(L1, L2):    
   doublons = []
   for i in range(len(L1)) : 
     for j in range(len(L2)):
@@ -189,10 +190,19 @@ def compute_path2(tree, source, target):
     
     
       
+def set_control_points(tree, gene, path, e):
+  position_vector = []
+  for n in path :
+    position_vector.append(tree[n])
+  # position_vector sous cette forme : [(-2683.61,3082.42,0), (-1554.76,2237.48,0), (-1155.87,721.011,0)]  
+  gene.setEdgeValue(e, position_vector)
+  
 
 
 def draw_bundles(gene, tree):
   viewLayout_interraction = gene.getLayoutProperty("viewLayout")
+  viewLayout_hierarchical = tree.getLayoutProperty("viewLayout")
+  viewShape = gene.getIntegerProperty("viewShape")
   for e in gene.getEdges():
     source = gene.source(e)
     target = gene.target(e)
@@ -200,29 +210,23 @@ def draw_bundles(gene, tree):
     find_path2(tree, source, L1)
     L2 = []
     find_path2(tree, target, L2)
-    find_path(L1,L2)
+    path = find_path(L1,L2)
+    path.pop()
+    del path[0]
+    set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
+#    viewShape[e] = tlp.EdgeShape.BezierCurve
+  viewShape.setAllEdgeValue(16)
 
 
-#  viewLayout_hierarchical = hierarchical_graph.getLayoutProperty("viewLayout")
-#  viewLayout_interraction = gene_interraction.getLayoutProperty("viewLayout")
-#  viewShape_hierarchical = hierarchical_graph.getIntegerProperty("viewShape")
-#  viewShape = graph.getIntegerProperty("viewShape")
-#  for e in gene_interraction.getEdges():
-#    path = compute_path(hierarchical_graph, gene_interraction.source(e), gene_interraction.target(e))    
-#    print path
-#
-#    	
-#    	viewShape[e] = tlp.EdgeShape.BezierCurve
-#    
-#    
-
-#def set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e):
-#  position_vector = []
-#  for n in path :
-#    position_vector.append(viewLayout_hierarchical[n])
-#  viewLayout_interraction.setEdgeValue(e, position_vector)
-#  print position_vector
-#
+#colorier les sommets (couleur à regler)
+def color_graph(gr,param,color):
+  params = tlp.getDefaultPluginParameters("Color Mapping",gr)
+  params["input property"] = param
+  print params #Voir a quoi ressemble la liste des couleurs
+  params["minimum value"]=0
+  params["maximum value"]=15
+  #params["color scale"]=
+  gr.applyColorAlgorithm("Color Mapping", color, params)
 
 
 
@@ -232,6 +236,8 @@ def main(graph):
 
   viewLayout = graph.getLayoutProperty("viewLayout")
   viewColor = graph.getColorProperty("viewColor")
+  param = graph.getDoubleProperty("tp1 s")
+
 
   preprocessing(graph, viewColor)
   
@@ -246,7 +252,8 @@ def main(graph):
 
 
   draw_bundles( root_cluster, hierarchical_tree)
-  
+  color_graph(root_cluster,param,viewColor)
+
   updateVisualization(centerViews = True)
 
   
