@@ -68,11 +68,12 @@ def draw_hierarchical_tree(tree, root, current_cluster):
   
   Then, for each current clusters that doesn't have childs draw each genes as nodes and fit it to its cluster.
   
+  @type tree: tlp.Graph
   @param tree: graph holding root
+  @type current_cluster: tlp.Graph
   @param current_cluster : a Tulip graph of the hierarchical ########TODO Ben - decrire la recursivite 
-  @param root: ro
-  ot node of the current_cluster
-
+  @type root: tlp.node
+  @param root: root node of the current_cluster
   """
   for cluster in current_cluster.getSubGraphs():
     current_node = tree.addNode()
@@ -102,11 +103,11 @@ def apply_radial_algorithm(gr,viewLayout):
 def compute_path(gr, u, v):
 #   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
   """
- This function allows to recover the path (nodes) which separate two nodes 
-
- @param gr : Tulip graph
- @ u : First node of interest
- @ v : Second node of interest
+  This function allows to recover the path (nodes) which separate two nodes 
+  
+  @param gr: Tulip graph
+  @param  u: First node of interest
+  @param  v: Second node of interest
   """
   print "coucou"
   queue = []
@@ -130,7 +131,19 @@ def find_clusters(gr):
   return clusters
 
 
-def find_path(L1, L2):    
+def find_path(L1, L2):   
+  """
+  Find the shortest path between two nodes using two lists. The lists are the path between the node of interest and the root node.
+  The first common node between this two path is the closest node which links the source and the target. 
+  
+  This function allow to find the first common node and remove the others, then return the path between the source and the target.
+  
+  @type  L1: list
+  @param L1: first path between the source node and root.
+  @type  L2: list
+  @param L2: second path between the target node and root.
+  @return:   node list ordered as the shortest path.
+  """ 
   doublons = []
   for i in range(len(L1)) : 
     for j in range(len(L2)):
@@ -141,7 +154,6 @@ def find_path(L1, L2):
   del doublons[0]
   for j in range(len(doublons)):
     L1.remove(doublons[j])
-      
   L2.reverse()
   return L1 + L2    
   
@@ -180,6 +192,12 @@ def set_control_points(tree, gene, path, e):
 
 
 def draw_bundles(gene, tree):
+  """
+  @type  gene: tlp.Graph
+  @param gene: Gene interactions graph
+  @type  tree: tlp.Graph
+  @param tree: hierarchical tree graph
+  """
   viewLayout_interraction = gene.getLayoutProperty("viewLayout")
   viewLayout_hierarchical = tree.getLayoutProperty("viewLayout")
   viewShape = gene.getIntegerProperty("viewShape")
@@ -199,6 +217,9 @@ def draw_bundles(gene, tree):
 
 #colorier les sommets (couleur à regler)
 def color_graph(gr,param,color):
+  """
+  
+  """
   params = tlp.getDefaultPluginParameters("Color Mapping",gr)
   params["input property"] = param
   params["minimum value"]=0
@@ -208,6 +229,18 @@ def color_graph(gr,param,color):
 
 
 def timePoint_hierarchy(nb_TP):
+  """
+  Convert the number of time points in a list with all the time points. This list is used by 
+  the others functions.
+  
+  The time points columns in the input dataset should be write like : "tpn s"
+  n is the time point number (the first time point is 1).
+  
+  @type  nb_TP: integer
+  @param nb_TP: the number of time points
+  @rtype      : list
+  @return     : all the Time points name.
+  """
   TPs = []
   for i in range(nb_TP):
     TP_name = "tp" + str(i+1) + " s"
@@ -216,6 +249,16 @@ def timePoint_hierarchy(nb_TP):
   
   
 def draw_timePoint_hierarchy(TPs, SM, gene):
+  """
+  
+  
+  @type   TPs: list 
+  @param  TPs: the Time points name 
+  @type    SM: Tulip graph
+  @param   SM: Small Multiples subgraph
+  @type  gene: Tulip graph
+  @param gene: Genes interactions subgraph
+  """
   viewColor = graph.getColorProperty("viewColor")
   for tp in TPs :
     tmp = SM.addSubGraph(tp)
@@ -223,7 +266,7 @@ def draw_timePoint_hierarchy(TPs, SM, gene):
     Metric = tmp.getDoubleProperty("viewMetric")
     pr = tmp.getDoubleProperty(tp)
     for n in tmp.getNodes():
-      properties = gr.getNodePropertiesValues(n)
+      properties = tmp.getNodePropertiesValues(n)
       Metric[n] = properties[tp]
     color_graph(tmp, pr, viewColor)
 
