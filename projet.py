@@ -10,34 +10,31 @@ Visual analysis of gene expression data
 01/26/2016
 """
 
-# To cancel the modifications performed by the script
-# on the current graph, click on the undo button.
-
-# Some useful keyboards shortcuts : 
-#   * Ctrl + D : comment selected lines.
-#   * Ctrl + Shift + D  : uncomment selected lines.
-#   * Ctrl + I : indent selected lines.
-#   * Ctrl + Shift + I  : unindent selected lines.
-#   * Ctrl + Return  : run script.
-#   * Ctrl + F  : find selected text.
-#   * Ctrl + R  : replace selected text.
-#   * Ctrl + Space  : show auto-completion dialog.
-
-# -*- coding: utf-8 -*-
 from tulip import tlp
 
-# The updateVisualization(centerViews = True) function can be called
-# during script execution to update the opened views
+"""
+MIT License
 
-# The pauseScript() function can be called to pause the script execution.
-# To resume the script execution, you will have to click on the "Run script " button.
+Copyright (c) 2019 JUNG Frédéric | BLAIS Benjamin
 
-# The runGraphScript(scriptFile, graph) function can be called to launch
-# another edited script on a tlp.Graph object.
-# The scriptFile parameter defines the script name to call (in the form [a-zA-Z0-9_]+.py)
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-# The main(graph) function must be defined 
-# to run the script on the current graph
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 
 
 def preprocessing(gr, viewColor):
@@ -109,7 +106,6 @@ def compute_path(gr, u, v):
   @param  u: First node of interest
   @param  v: Second node of interest
   """
-  print "coucou"
   queue = []
   queue.append([u])
   while queue :
@@ -131,7 +127,7 @@ def find_clusters(gr):
   return clusters
 
 
-def find_path(L1, L2):   
+def compute_path(L1, L2):   
   """
   Find the shortest path between two nodes using two lists. The lists are the path between the node of interest and the root node.
   The first common node between this two path is the closest node which links the source and the target. 
@@ -157,29 +153,21 @@ def find_path(L1, L2):
   L2.reverse()
   return L1 + L2    
   
-def find_path2(gr, node, position):
-  #TODO enlever position en argument -> Fredo
-  if gr.getInNodes(node) > 0 :
-    position.append(node)
-    for n in gr.getInNodes(node):
-      find_path2(gr, n, position)
-  
 
-
-
-def compute_path2(tree, source, target):
-  path = []
-  clusters = find_clusters(tree)
-  count =  0
-  for n in tree.getInOutNodes(source):
-    parent_source = n
-  for n in tree.getInOutNodes(target):
-    parent_target= n
-  path.append(parent_source)
-  find_path(tree, parent_source, parent_target, path, clusters)
-  path.append(parent_target)
-  return path
-    
+#
+#def compute_path2(tree, source, target):
+#  path = []
+#  clusters = find_clusters(tree)
+#  count =  0
+#  for n in tree.getInOutNodes(source):
+#    parent_source = n
+#  for n in tree.getInOutNodes(target):
+#    parent_target= n
+#  path.append(parent_source)
+#  find_path(tree, parent_source, parent_target, path, clusters)
+#  path.append(parent_target)
+#  return path
+#    
     
       
 def set_control_points(tree, gene, path, e):
@@ -188,7 +176,23 @@ def set_control_points(tree, gene, path, e):
     position_vector.append(tree[n])
   # position_vector sous cette forme : [(-2683.61,3082.42,0), (-1554.76,2237.48,0), (-1155.87,721.011,0)]  
   gene.setEdgeValue(e, position_vector)
-  
+
+def find_parents(gr, node, position):
+  if gr.getInNodes(node) > 0 :
+    position.append(node)
+    for n in gr.getInNodes(node):
+      find_path2(gr, n, position)
+  return position
+
+def find_path(gr, source, target):
+  L1 = []
+  L2 = []
+  L1 = find_parents(gr, source, L1)
+  L2 = find_parents(gr, target, L2)
+  path = compute_path(L1,L2)
+  path.pop()
+  del path[0]
+  return path
 
 
 def draw_bundles(gene, tree):
@@ -204,13 +208,7 @@ def draw_bundles(gene, tree):
   for e in gene.getEdges():
     source = gene.source(e)
     target = gene.target(e)
-    L1 = []
-    find_path2(tree, source, L1)
-    L2 = []
-    find_path2(tree, target, L2)
-    path = find_path(L1,L2)
-    path.pop()
-    del path[0]
+    path = find_path(tree, source, target)
     set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
   viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
 
@@ -233,8 +231,8 @@ def timePoint_hierarchy(nb_TP):
   Convert the number of time points in a list with all the time points. This list is used by 
   the others functions.
   
-  The time points columns in the input dataset should be write like : "tpn s"
-  n is the time point number (the first time point is 1).
+  The time points columns in the input dataset should be write like : "tp* s"
+  * is the time point number (the first time point is 1).
   
   @type  nb_TP: integer
   @param nb_TP: the number of time points
