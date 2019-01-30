@@ -225,6 +225,15 @@ def draw_bundles(gene, tree):
   viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
 
 def color_gradient(nb_gradient):
+  """
+  Compute and return the color gradient form red to green for
+  a color mapping algorithme.
+  
+  @type  nb_gradient: int
+  @param nb_gradient: the number of gradients 
+  @rtype            : list
+  @return           : the list of gradients colors
+  """
   colors = []
   r = 255
   g = 0
