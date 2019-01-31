@@ -312,6 +312,7 @@ def draw_timePoint_hierarchy(TPs, SM, gene):
       properties = tmp.getNodePropertiesValues(n)
       Metric[n] = properties[tp]
     color_graph(tmp, pr, viewColor)
+    
 
 def main(graph): 
   viewLayout = graph.getLayoutProperty("viewLayout")
@@ -329,8 +330,34 @@ def main(graph):
   SM = graph.addSubGraph("Small multiples")
   draw_timePoint_hierarchy(TPs, SM, root_cluster)
   updateVisualization(centerViews = True)
+  
+  tp = SM.getSubGraph("tp1 s")
+  bb_tp = tlp.computeBoundingBox(tp)
+  bb_sm = tlp.computeBoundingBox(SM)
+  vec = tlp.Vec3f(bb_tp.width() + 2000,0,0)
+#  v = tlp.Vec3f(1000, 1000) 
+#  bb_tp.translate(v)
+
+
+  lay = SM.getLayoutProperty("viewLayout")
+  for n in tp.getNodes() :
+    lay[n] = lay[n] + vec
+  
+
+  for e in tp.getEdges():
+    Ltmp = []
+    for el in lay[e]:
+      h = el + vec
+      Ltmp.append(h)
+    lay[e] = Ltmp
+  
+  
+    
+
+
 
  
+  
   
   
   
