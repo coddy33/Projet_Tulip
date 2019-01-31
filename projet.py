@@ -241,13 +241,18 @@ def color_gradient(nb_gradient):
   gradient = 255/(nb_gradient/2)
   for i in range(nb_gradient/2) :
     colors.append(tlp.Color(r,g,b))
+    colors.append(tlp.Color(r,g,b))
     r = r - gradient
   r = 0
   colors.append(tlp.Color.Black)
+  colors.append(tlp.Color.Black)
   for i in range (nb_gradient/2):
+    colors.append(tlp.Color(r,g,b))
     colors.append(tlp.Color(r,g,b))
     g = g + gradient
   return colors
+  
+  
   
 #colorier les sommets (couleur à regler)
 def color_graph(gr,param,color):
@@ -267,6 +272,7 @@ def color_graph(gr,param,color):
   gr.applyColorAlgorithm("Color Mapping", color, params)
 
 
+#[(255,0,0,255), (230,0,0,255), (205,0,0,255), (180,0,0,255), (155,0,0,255), (130,0,0,255), (105,0,0,255), (80,0,0,255), (55,0,0,255), (30,0,0,255), (0,0,0,255), (0,0,0,255), (0,25,0,255), (0,50,0,255), (0,75,0,255), (0,100,0,255), (0,125,0,255), (0,150,0,255), (0,175,0,255), (0,200,0,255), (0,225,0,255)]
 
 
 def timePoint_hierarchy(nb_TP):
@@ -313,8 +319,32 @@ def draw_timePoint_hierarchy(TPs, SM, gene):
       Metric[n] = properties[tp]
     color_graph(tmp, pr, viewColor)
     
+def small_multiple(nb_col,TPs,SM,lay):
+  bb_tp = tlp.computeBoundingBox(SM)
+  x = 0
+  y=0
+  count = 0
+  for gr in TPs :
+    x = x + bb_tp.width() + 2000
+    tp = SM.getSubGraph(gr)
+    if count >= nb_col :
+      x = bb_tp.width() + 2000
+      y = y - bb_tp.height() - 2000
+      count =0
+    for n in tp.getNodes() :
+      lay[n] = lay[n] + tlp.Vec3f( x,y,0)  
+    for e in tp.getEdges():
+      Ltmp = []
+      for el in lay[e]:
+        h = el + tlp.Vec3f(x ,y,0)  
+        Ltmp.append(h)
+      lay[e] = Ltmp
+    count +=1
 
-def main(graph): 
+
+  
+
+def main(graph):
   viewLayout = graph.getLayoutProperty("viewLayout")
   viewColor = graph.getColorProperty("viewColor")
   param = graph.getDoubleProperty("tp1 s")
@@ -329,34 +359,49 @@ def main(graph):
   TPs = timePoint_hierarchy(17)
   SM = graph.addSubGraph("Small multiples")
   draw_timePoint_hierarchy(TPs, SM, root_cluster)
-  updateVisualization(centerViews = True)
   
-  tp = SM.getSubGraph("tp1 s")
-  bb_tp = tlp.computeBoundingBox(tp)
-  bb_sm = tlp.computeBoundingBox(SM)
-  vec = tlp.Vec3f(bb_tp.width() + 2000,0,0)
-#  v = tlp.Vec3f(1000, 1000) 
-#  bb_tp.translate(v)
-
-
   lay = SM.getLayoutProperty("viewLayout")
-  for n in tp.getNodes() :
-    lay[n] = lay[n] + vec
-  
+  small_multiple(5,TPs,SM,lay)
 
-  for e in tp.getEdges():
-    Ltmp = []
-    for el in lay[e]:
-      h = el + vec
-      Ltmp.append(h)
-    lay[e] = Ltmp
-  
-  
-    
+##  draw_small_multiples(4, SM, lay, TPs) 
+#  tp = SM.getSubGraph("tp1 s")
+#  bb_tp = tlp.computeBoundingBox(tp)
+##  bb = tlp.computeBoundingBox(SM)
+#
+#
+#
+#  x = 0
+#  y=0
+#  count = 0
+#  nb_col = 5
+#  for gr in TPs :
+#    x = x + bb_tp.width() + 2000
+#    tp = SM.getSubGraph(gr)
+#    if count >= nb_col :
+#      x = bb_tp.width() + 2000
+#      y = y - bb_tp.height() - 2000
+#      count =0
+#    for n in tp.getNodes() :
+#      lay[n] = lay[n] + tlp.Vec3f( x,y,0)  
+#    for e in tp.getEdges():
+#      Ltmp = []
+#      for el in lay[e]:
+#        h = el + tlp.Vec3f(x ,y,0)  
+#        Ltmp.append(h)
+#      lay[e] = Ltmp
+#    count +=1
 
 
 
- 
+#  for n in tp.getNodes() :
+#    lay[n] = lay[n] + vec
+#  for e in tp.getEdges():
+#    Ltmp = []
+#    for el in lay[e]:
+#      h = el + vec
+#      Ltmp.append(h)
+#      lay[e] = Ltmp
+# 
   
   
   
