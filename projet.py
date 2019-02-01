@@ -38,6 +38,9 @@ SOFTWARE.
 """
 
 from tulip import tlp
+import time
+
+start = time.time()
 
 
 def preprocessing(gr, viewColor):
@@ -121,6 +124,8 @@ def compute_pathway(gr, u, v):
         new_path.append(n)
         queue.append(new_path)
         if n == v:
+          new_path.pop()
+          del new_path[0]
           return new_path 
       explored.append(node)
 
@@ -228,6 +233,7 @@ def draw_bundles(gene, tree):
     source = gene.source(e)
     target = gene.target(e)
     path = find_path(tree, source, target)
+#    path = compute_pathway(tree,source,target)
     set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
   viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
 
@@ -365,59 +371,14 @@ def main(graph):
   color_graph(root_cluster,param,viewColor)
   TPs = timePoint_hierarchy(17)
   SM = graph.addSubGraph("Small multiples")
-#  draw_timePoint_hierarchy(TPs, SM, root_cluster)
+  draw_timePoint_hierarchy(TPs, SM, root_cluster)
   
   lay = SM.getLayoutProperty("viewLayout")
-#  draw_small_multiples(5,TPs,SM,lay)
+  draw_small_multiples(5,TPs,SM,lay)
 
-  e = root_cluster.getRandomEdge()
-  src = root_cluster.source(e)
-  tgt = root_cluster.target(e)
-  print src
-  print tgt
-  print find_path(hierarchical_tree, src, tgt)
-  print compute_pathway(hierarchical_tree, src, tgt)
-
-##  draw_small_multiples(4, SM, lay, TPs) 
-#  tp = SM.getSubGraph("tp1 s")
-#  bb_tp = tlp.computeBoundingBox(tp)
-##  bb = tlp.computeBoundingBox(SM)
-#
-#
-#
-#  x = 0
-#  y=0
-#  count = 0
-#  nb_col = 5
-#  for gr in TPs :
-#    x = x + bb_tp.width() + 2000
-#    tp = SM.getSubGraph(gr)
-#    if count >= nb_col :
-#      x = bb_tp.width() + 2000
-#      y = y - bb_tp.height() - 2000
-#      count =0
-#    for n in tp.getNodes() :
-#      lay[n] = lay[n] + tlp.Vec3f( x,y,0)  
-#    for e in tp.getEdges():
-#      Ltmp = []
-#      for el in lay[e]:
-#        h = el + tlp.Vec3f(x ,y,0)  
-#        Ltmp.append(h)
-#      lay[e] = Ltmp
-#    count +=1
-
-
-
-#  for n in tp.getNodes() :
-#    lay[n] = lay[n] + vec
-#  for e in tp.getEdges():
-#    Ltmp = []
-#    for el in lay[e]:
-#      h = el + vec
-#      Ltmp.append(h)
-#      lay[e] = Ltmp
-# 
-  
-  
+  print "Time elapsed :", time.time() - start, " secondes"
+    
+#  Time elapsed :10.0036051273 secondes -> find_path()
+#  Time elapsed :103.376773834 secondes -> compute_pathway()
   
   
