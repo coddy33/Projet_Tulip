@@ -2,42 +2,42 @@
 # -*- coding: utf-8 -*-
 
 """
-BLAIS Benjamin
-JUNG Frédéric 
 
-Visual analysis of gene expression data
 
-01/26/2016
+@author: BLAIS Benjamin
+@author: JUNG Frédéric 
+
+  
+@requires: tlp, python2
+
+
+@date: 02/03/2019
+
+
+@license: MIT License
+
+Copyright (c) 2019 
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
-# To cancel the modifications performed by the script
-# on the current graph, click on the undo button.
-
-# Some useful keyboards shortcuts : 
-#   * Ctrl + D : comment selected lines.
-#   * Ctrl + Shift + D  : uncomment selected lines.
-#   * Ctrl + I : indent selected lines.
-#   * Ctrl + Shift + I  : unindent selected lines.
-#   * Ctrl + Return  : run script.
-#   * Ctrl + F  : find selected text.
-#   * Ctrl + R  : replace selected text.
-#   * Ctrl + Space  : show auto-completion dialog.
-
-# -*- coding: utf-8 -*-
 from tulip import tlp
-
-# The updateVisualization(centerViews = True) function can be called
-# during script execution to update the opened views
-
-# The pauseScript() function can be called to pause the script execution.
-# To resume the script execution, you will have to click on the "Run script " button.
-
-# The runGraphScript(scriptFile, graph) function can be called to launch
-# another edited script on a tlp.Graph object.
-# The scriptFile parameter defines the script name to call (in the form [a-zA-Z0-9_]+.py)
-
-# The main(graph) function must be defined 
-# to run the script on the current graph
 
 
 def preprocessing(gr, viewColor):
@@ -68,11 +68,12 @@ def draw_hierarchical_tree(tree, root, current_cluster):
   
   Then, for each current clusters that doesn't have childs draw each genes as nodes and fit it to its cluster.
   
+  @type tree: tlp.Graph
   @param tree: graph holding root
+  @type current_cluster: tlp.Graph
   @param current_cluster : a Tulip graph of the hierarchical ########TODO Ben - decrire la recursivite 
-  @param root: ro
-  ot node of the current_cluster
-
+  @type root: tlp.node
+  @param root: root node of the current_cluster
   """
   for cluster in current_cluster.getSubGraphs():
     current_node = tree.addNode()
@@ -98,28 +99,30 @@ def apply_radial_algorithm(gr,viewLayout):
   gr.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
 
 
-#Recuperer le chemin entre deux noeuds (sommets)
-def compute_path(gr, u, v):
-#   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
+def compute_pathway(gr, u, v):
+#https://pythoninwonderland.wordpress.com/2017/03/18/how-to-implement-breadth-first-search-in-python/  
+#https://crab.rutgers.edu/~guyk/BFS.pdf
   """
-This function allows to recover the path (nodes) which separate two nodes 
-
- @param gr : Tulip graph
- @ u : First node of interest
- @ v : Second node of interest
+  This function allows to recover the path (nodes) which separate two nodes 
+  
+  @param gr: Tulip graph
+  @param  u: First node of interest
+  @param  v: Second node of interest
   """
-  print "coucou"
+  explored = []
   queue = []
   queue.append([u])
   while queue :
     path = queue.pop(0)
     node = path[-1]
-    if node == v:
-      return path
-    for adjacent in gr.getInOutNodes(node):
-      new_path = list(path)
-      new_path.append(adjacent)
-      queue.append(new_path)
+    if node not in explored: 
+      for n in gr.getInOutNodes(node):
+        new_path = list(path)
+        new_path.append(n)
+        queue.append(new_path)
+        if n == v:
+          return new_path 
+      explored.append(node)
 
 def find_clusters(gr):
   viewLabel = gr.getStringProperty("viewLabel")
@@ -130,7 +133,20 @@ def find_clusters(gr):
   return clusters
 
 
-def find_path(L1, L2):    
+def compute_path(L1, L2):   
+  """
+  Find the shortest path between two nodes using two lists. The lists are the path between the node of interest and the root node.
+  The first common node between this two path is the closest node which links the source and the target. 
+  
+  This function allow to find the first common node between two lists and remove the others nodes.
+  Then return the path between the source and the target.
+  
+  @type  L1: list
+  @param L1: first path between the source node and root.
+  @type  L2: list
+  @param L2: second path between the target node and root.
+  @return:   node list ordered as the shortest path.
+  """ 
   doublons = []
   for i in range(len(L1)) : 
     for j in range(len(L2)):
@@ -141,33 +157,24 @@ def find_path(L1, L2):
   del doublons[0]
   for j in range(len(doublons)):
     L1.remove(doublons[j])
-      
   L2.reverse()
   return L1 + L2    
   
-def find_path2(gr, node, position):
-  #TODO enlever position en argument -> Fredo
-  if gr.getInNodes(node) > 0 :
-    position.append(node)
-    for n in gr.getInNodes(node):
-      find_path2(gr, n, position)
-  
 
-
-
-def compute_path2(tree, source, target):
-  path = []
-  clusters = find_clusters(tree)
-  count =  0
-  for n in tree.getInOutNodes(source):
-    parent_source = n
-  for n in tree.getInOutNodes(target):
-    parent_target= n
-  path.append(parent_source)
-  find_path(tree, parent_source, parent_target, path, clusters)
-  path.append(parent_target)
-  return path
-    
+#
+#def compute_path2(tree, source, target):
+#  path = []
+#  clusters = find_clusters(tree)
+#  count =  0
+#  for n in tree.getInOutNodes(source):
+#    parent_source = n
+#  for n in tree.getInOutNodes(target):
+#    parent_target= n
+#  path.append(parent_source)
+#  find_path(tree, parent_source, parent_target, path, clusters)
+#  path.append(parent_target)
+#  return path
+#    
     
       
 def set_control_points(tree, gene, path, e):
@@ -176,89 +183,221 @@ def set_control_points(tree, gene, path, e):
     position_vector.append(tree[n])
   # position_vector sous cette forme : [(-2683.61,3082.42,0), (-1554.76,2237.48,0), (-1155.87,721.011,0)]  
   gene.setEdgeValue(e, position_vector)
+
+def find_parents(gr, node, parents):
+  """
+  Find the shortest path between the node and its parent.
   
+  @type       gr: tlp.Graph
+  @param      gr: the current graph
+  @type     node: tlp.node
+  @param    node: the node of intereset
+  @type  parents: list
+  @param parents: empty list of node'parents
+  @rtype        : list
+  @return       : list of parents
+  """
+  if gr.getInNodes(node) > 0 :
+    parents.append(node)
+    for n in gr.getInNodes(node):
+      find_parents(gr, n, parents)
+  return parents
+
+def find_path(gr, source, target):
+  L1 = []
+  L2 = []
+  L1 = find_parents(gr, source, L1)
+  L2 = find_parents(gr, target, L2)
+  path = compute_path(L1,L2)
+  path.pop()
+  del path[0]
+  return path
 
 
 def draw_bundles(gene, tree):
+  """
+  @type  gene: tlp.Graph
+  @param gene: Gene interactions graph
+  @type  tree: tlp.Graph
+  @param tree: hierarchical tree graph
+  """
   viewLayout_interraction = gene.getLayoutProperty("viewLayout")
   viewLayout_hierarchical = tree.getLayoutProperty("viewLayout")
   viewShape = gene.getIntegerProperty("viewShape")
-#  for e in gene.getEdges():
-#    source = gene.source(e)
-#    target = gene.target(e)
-#    L1 = []
-#    find_path2(tree, source, L1)
-#    L2 = []
-#    find_path2(tree, target, L2)
-#    path = find_path(L1,L2)
-#    path.pop()#vire le dernier noeud
-#    del path[0] #vire le premier noeud
-#    set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
-##    viewShape[e] = tlp.EdgeShape.BezierCurve
-#  viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
+  for e in gene.getEdges():
+    source = gene.source(e)
+    target = gene.target(e)
+    path = find_path(tree, source, target)
+    set_control_points(viewLayout_hierarchical, viewLayout_interraction, path, e)
+  viewShape.setAllEdgeValue(tlp.EdgeShape.CubicBSplineCurve)
 
-
+def color_gradient(nb_gradient):
+  """
+  Compute and return the color gradient form red to green for
+  a color mapping algorithme.
+  
+  @type  nb_gradient: int
+  @param nb_gradient: the number of gradients 
+  @rtype            : list
+  @return           : the list of gradients colors
+  """
+  colors = []
+  r = 255
+  g = 0
+  b = 0
+  gradient = 255/(nb_gradient/2)
+  for i in range(nb_gradient/2) :
+    colors.append(tlp.Color(r,g,b))
+    colors.append(tlp.Color(r,g,b))
+    r = r - gradient
+  r = 0
+  colors.append(tlp.Color.Black)
+  colors.append(tlp.Color.Black)
+  for i in range (nb_gradient/2):
+    colors.append(tlp.Color(r,g,b))
+    colors.append(tlp.Color(r,g,b))
+    g = g + gradient
+  return colors
+  
+  
+  
 #colorier les sommets (couleur à regler)
 def color_graph(gr,param,color):
-  params = tlp.getDefaultPluginParameters("Color Mapping",gr)
-  params["input property"] = param
-  colorScale=tlp.ColorScale([])
-  colors=[tlp.Color.Red,tlp.Color.Black,tlp.Color.Green]
-  colorScale.setColorScale(colors)
-  params["color scale"]= colorScale #je cherche à faire fonctionner ça pour le color scale
-  params["minimum value"]=0
-  params["override minimum value"]= False
-  params["maximum value"]=0
-  params["override maximum value"]= False
-
+  """
   
-  #params["color scale"]=
+  """
+  params = tlp.getDefaultPluginParameters("Color Mapping",gr)
+  colorScale = tlp.ColorScale([])
+  params["input property"] = param
+#  params["minimum value"]=0
+#  params["maximum value"]=15
+#  colors = [tlp.Color.Red, tlp.Color.Black, tlp.Color.Green]
+#  colors=[tlp.Color.Red,tlp.Color.Red,tlp.Color(192,0,0),tlp.Color(192,0,0),tlp.Color(128,0,0),tlp.Color(128,0,0),tlp.Color(64,0,0),tlp.Color(0,0,0),tlp.Color(0,0,0),tlp.Color(0,51,0),tlp.Color(0,51,0),tlp.Color(0,102,0),tlp.Color(0,153,0),tlp.Color(0,153,0),tlp.Color(0,204,0),tlp.Color(0,204,0),tlp.Color.Green,tlp.Color.Green,tlp.Color.Green]
+  colors = color_gradient(20)
+  colorScale.setColorScale(colors)
+  params["color scale"] = colorScale
   gr.applyColorAlgorithm("Color Mapping", color, params)
 
 
+#[(255,0,0,255), (230,0,0,255), (205,0,0,255), (180,0,0,255), (155,0,0,255), (130,0,0,255), (105,0,0,255), (80,0,0,255), (55,0,0,255), (30,0,0,255), (0,0,0,255), (0,0,0,255), (0,25,0,255), (0,50,0,255), (0,75,0,255), (0,100,0,255), (0,125,0,255), (0,150,0,255), (0,175,0,255), (0,200,0,255), (0,225,0,255)]
 
 
-def main(graph): 
-  #TODO scene color = white
+def timePoint_hierarchy(nb_TP):
+  """
+  Convert the number of time points in a list with all the time points. This list is used by 
+  the others functions.
+  
+  The time points columns in the input dataset should be write like : "tp* s"
+  * is the time point number (the first time point is 1).
+  
+  @type  nb_TP: integer
+  @param nb_TP: the number of time points
+  @rtype      : list
+  @return     : all the Time points name.
+  """
+  TPs = []
+  for i in range(nb_TP):
+    TP_name = "tp" + str(i+1) + " s"
+    TPs.append(TP_name)
+  return TPs
+  
+  
+def draw_timePoint_hierarchy(TPs, SM, gene):
+  """
+  Add a Small Multiples subgraph for each time points with the gene interractions properties.
+  
+  Time points data are set in the viewMetric columns and defined the graph colors.
+  
+  @type   TPs: list 
+  @param  TPs: the Time points name 
+  @type    SM: Tulip graph
+  @param   SM: Small Multiples subgraph
+  @type  gene: Tulip graph
+  @param gene: Genes interactions subgraph
+  """
+  viewColor = graph.getColorProperty("viewColor")
+  for tp in TPs :
+    tmp = SM.addSubGraph(tp)
+    tlp.copyToGraph(tmp, gene)
+    Metric = tmp.getDoubleProperty("viewMetric")
+    pr = tmp.getDoubleProperty(tp)
+    for n in tmp.getNodes():
+      properties = tmp.getNodePropertiesValues(n)
+      Metric[n] = properties[tp]
+    color_graph(tmp, pr, viewColor)
+    
+#def draw_small_multiples(nb_col,TPs,SM,lay):
+#  bb_tp = tlp.computeBoundingBox(SM)
+#  x = 0
+#  y=0
+#  count = 0
+#  for gr in TPs :
+#    x = x + bb_tp.width() + 2000
+#    tp = SM.getSubGraph(gr)
+#    if count >= nb_col :
+#      x = bb_tp.width() + 2000
+#      y = y - bb_tp.height() - 2000
+#      count =0
+#    for n in tp.getNodes() :
+#      lay[n] = lay[n] + tlp.Vec3f( x,y,0)  
+#    for e in tp.getEdges():
+#      Ltmp = []
+#      for el in lay[e]:
+#        h = el + tlp.Vec3f(x ,y,0)  
+#        Ltmp.append(h)
+#      lay[e] = Ltmp
+#    count +=1
 
+#Fonction_Translate_Ben
+def draw_small_multiples(nb_col,TPs,SM,lay):
+  bb_tp = tlp.computeBoundingBox(SM)
+  x = 0
+  y=0
+  count = 0
+  for gr in TPs :
+    x = x + bb_tp.width() + 2000
+    tp = SM.getSubGraph(gr)
+    #lay = tp.getLayoutProperty("viewlayout")
+    if count >= nb_col :
+      x = bb_tp.width() + 2000
+      y = y - bb_tp.height() - 2000
+      count =0
+    count=count+1
+    lay.translate(tlp.Vec3f(x,y,0),tp)
+    
+    
+
+  
+
+def main(graph):
   viewLayout = graph.getLayoutProperty("viewLayout")
   viewColor = graph.getColorProperty("viewColor")
   param = graph.getDoubleProperty("tp1 s")
-  param2 = graph.getDoubleProperty("tp15 s")
-
-
   preprocessing(graph, viewColor)
-  
   root_cluster = graph.getSubGraph("Genes interactions")
   hierarchical_tree = graph.addSubGraph("hierarchical_graph") # init new graph 
-  
   root = hierarchical_tree.addNode({"name":"root"}) # first node as root 
   draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
-  
   apply_radial_algorithm(hierarchical_tree,viewLayout)
-  
-
-
   draw_bundles( root_cluster, hierarchical_tree)
-  color_graph(root_cluster,param2,viewColor)
-
-  updateVisualization(centerViews = True)
-
+  color_graph(root_cluster,param,viewColor)
+  TPs = timePoint_hierarchy(17)
+  SM = graph.addSubGraph("Small multiples")
+  draw_timePoint_hierarchy(TPs, SM, root_cluster)
   
-#  print find_path(L1,L2)
+  lay = SM.getLayoutProperty("viewLayout")
+  draw_small_multiples(5,TPs,SM,lay)
 
-#  print compute_path2(hierarchical_tree, A, B)
+#  e = root_cluster.getRandomEdge()
+#  src = root_cluster.source(e)
+#  tgt = root_cluster.target(e)
+#  print src
+#  print tgt
+#  print find_path(hierarchical_tree, src, tgt)
+#  print compute_pathway(hierarchical_tree, src, tgt)
+#
+#
 
-#  print A
-#  print B  
-#  print compute_path(hierarchical_tree, root, B)
-  
-#  print hierarchical_tree.existEdge(path[0],path[2]) # retourne <edge 4294967295> si l'edge existe pas
-
-#  bundles = graph.getSubGraph("Bundles")
-#  4294967295
-  
-  
   
   
   
