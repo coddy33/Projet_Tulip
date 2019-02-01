@@ -2,17 +2,21 @@
 # -*- coding: utf-8 -*-
 
 """
-BLAIS Benjamin
-JUNG Frédéric 
-
-Visual analysis of gene expression data
-
-01/26/2019
 
 
-MIT License
+@author: BLAIS Benjamin
+@author: JUNG Frédéric 
 
-Copyright (c) 2019 JUNG Frédéric | BLAIS Benjamin
+  
+@requires: tlp, python2
+
+
+@date: 02/03/2019
+
+
+@license: MIT License
+
+Copyright (c) 2019 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -95,9 +99,9 @@ def apply_radial_algorithm(gr,viewLayout):
   gr.applyLayoutAlgorithm("Tree Radial", viewLayout, params)
 
 
-#Recuperer le chemin entre deux noeuds (sommets)
-def compute_path(gr, u, v):
-#   source : https://stackoverflow.com/questions/8922060/how-to-trace-the-path-in-a-breadth-first-search
+def compute_pathway(gr, u, v):
+#https://pythoninwonderland.wordpress.com/2017/03/18/how-to-implement-breadth-first-search-in-python/  
+#https://crab.rutgers.edu/~guyk/BFS.pdf
   """
   This function allows to recover the path (nodes) which separate two nodes 
   
@@ -105,17 +109,20 @@ def compute_path(gr, u, v):
   @param  u: First node of interest
   @param  v: Second node of interest
   """
+  explored = []
   queue = []
   queue.append([u])
   while queue :
     path = queue.pop(0)
     node = path[-1]
-    if node == v:
-      return path
-    for adjacent in gr.getInOutNodes(node):
-      new_path = list(path)
-      new_path.append(adjacent)
-      queue.append(new_path)
+    if node not in explored: 
+      for n in gr.getInOutNodes(node):
+        new_path = list(path)
+        new_path.append(n)
+        queue.append(new_path)
+        if n == v:
+          return new_path 
+      explored.append(node)
 
 def find_clusters(gr):
   viewLabel = gr.getStringProperty("viewLabel")
@@ -319,7 +326,7 @@ def draw_timePoint_hierarchy(TPs, SM, gene):
       Metric[n] = properties[tp]
     color_graph(tmp, pr, viewColor)
     
-def small_multiple(nb_col,TPs,SM,lay):
+def draw_small_multiples(nb_col,TPs,SM,lay):
   bb_tp = tlp.computeBoundingBox(SM)
   x = 0
   y=0
@@ -358,10 +365,18 @@ def main(graph):
   color_graph(root_cluster,param,viewColor)
   TPs = timePoint_hierarchy(17)
   SM = graph.addSubGraph("Small multiples")
-  draw_timePoint_hierarchy(TPs, SM, root_cluster)
+#  draw_timePoint_hierarchy(TPs, SM, root_cluster)
   
   lay = SM.getLayoutProperty("viewLayout")
-  small_multiple(5,TPs,SM,lay)
+#  draw_small_multiples(5,TPs,SM,lay)
+
+  e = root_cluster.getRandomEdge()
+  src = root_cluster.source(e)
+  tgt = root_cluster.target(e)
+  print src
+  print tgt
+  print find_path(hierarchical_tree, src, tgt)
+  print compute_pathway(hierarchical_tree, src, tgt)
 
 ##  draw_small_multiples(4, SM, lay, TPs) 
 #  tp = SM.getSubGraph("tp1 s")
