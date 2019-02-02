@@ -378,6 +378,7 @@ def get_gene_name(gr):
   Locus_property = gr.getStringProperty("Locus")
   name_property = gr.getStringProperty("Gene Name")
   condition_property = gr.getStringProperty("Condition")
+  product_property = gr.getStringProperty("Product name")
   file = urllib.urlopen(GeneProductSet)
   file2 = urllib.urlopen(GCSet)
   locus = [] 
@@ -385,10 +386,13 @@ def get_gene_name(gr):
     locus.append(Locus_property[n])
   
   for line in file:
-    L =  line.split()
-    if L[0] in locus :
-      node = Locus_property.getNodesEqualTo(L[0])
-      name_property[list(node)[0]] = L[1]
+    L =  line.split("\t")
+    header = re.search("^#.*", line)
+    if L[0] in locus  :
+      node = list(Locus_property.getNodesEqualTo(L[0]))[0]
+      if len(L) >= 7:
+        product_property[node] = L[6].rstrip()
+      name_property[node] = L[1]
 
   file.close()
   names = []
