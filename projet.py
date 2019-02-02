@@ -41,6 +41,10 @@ SOFTWARE.
 
 from tulip import tlp
 import time
+import re #regex
+import urllib
+
+
 
 start = time.time()
 
@@ -368,9 +372,46 @@ def draw_small_multiples_v2(nb_col,TPs,SM,lay):
     lay.translate(tlp.Vec3f(x,y,0),tp)
     
   
-
+def get_gene_name(gr):
+  GeneProductSet = "http://regulondb.ccg.unam.mx/menu/download/datasets/files/GeneProductSet.txt"
+  GCSet = "http://regulondb.ccg.unam.mx/menu/download/datasets/files/GCSet.txt"
+  Locus_property = gr.getStringProperty("Locus")
+  name_property = gr.getStringProperty("Gene Name")
+  condition_property = gr.getStringProperty("Condition")
+  file = urllib.urlopen(GeneProductSet)
+  file2 = urllib.urlopen(GCSet)
+  locus = [] 
+  for n in gr.getNodes():
+    locus.append(Locus_property[n])
   
+  for line in file:
+    L =  line.split()
+    if L[0] in locus :
+      node = Locus_property.getNodesEqualTo(L[0])
+      name_property[list(node)[0]] = L[1]
 
+  file.close()
+  names = []
+  for n in gr.getNodes():
+    names.append(name_property[n])
+
+  for line in file2:
+    L =  line.split("\t")
+    header = re.search("^#.*", line)
+    if header:
+      pass
+    elif L[5] in names : 
+      node = name_property.getNodesEqualTo(L[5])
+      condition_property[list(node)[0]] = L[1]
+       
+  file2.close()
+  
+#
+#get 
+#  file = urllib.urlopen(GeneProductSet)
+#  
+  
+    
 def main(graph):
   viewLayout = graph.getLayoutProperty("viewLayout")
   viewColor = graph.getColorProperty("viewColor")
@@ -392,10 +433,13 @@ def main(graph):
   SM = graph.addSubGraph("Small multiples")
   lay = SM.getLayoutProperty("viewLayout")
   draw_timePoint_hierarchy(TPs, SM, root_cluster)
-  #draw_small_multiples(5,TPs,SM,lay)
-  draw_small_multiples_v2(5,TPs,SM,lay)
+  draw_small_multiples(5,TPs,SM,lay)
+#  draw_small_multiples_v2(5,TPs,SM,lay)
 
 
+
+  #Part IV 
+  get_gene_name(root_cluster)
 
   #Time counter
   print "Time elapsed :", time.time() - start, " secondes"
