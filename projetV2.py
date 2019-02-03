@@ -126,7 +126,7 @@ def apply_radial_algorithm(gr,viewLayout):
 #Method I
 def BFS_search(gr, u, v):
   """
-  find the shortest path between two nodes (source and target) unsing
+  Find the shortest path between two nodes (source and target) unsing
   the Breadth-First Search (BFS) algorithme.
   
   @type  gr: tlp.Graph
@@ -155,7 +155,7 @@ def BFS_search(gr, u, v):
 
 def find_clusters(gr):
   """
-  find nodes (that are not corresponding to a gene) in a hierarchical tree.
+  Find nodes (that are not corresponding to a gene) in a hierarchical tree.
   
   @type  gr: tlp.Graph
   @param gr: hierarchical tree
@@ -313,7 +313,7 @@ def color_gradient(nb_gradient):
 
 def color_graph(gr,param,color):
   """
-  Realizes a coloring of the graph gr according to the values ​​of param
+  Realize a coloring of the graph gr according to the values ​​of param
   
   @type gr: tlp.Graph
   @param gr: Current graph
@@ -447,7 +447,7 @@ def draw_small_multiples_v2(nb_col,TPs,SM,lay):
 #Part IV
 def get_gene_name(gr):
   """
-  query a database to assign to each locus a gene name, a product name, and a condition
+  Query a database to assign to each locus a gene name, a product name, and a condition
   
   @type gr: tlp.Graph
   @param gr: current graph
@@ -504,20 +504,20 @@ def main(graph):
   apply_radial_algorithm(hierarchical_tree,viewLayout)
   draw_bundles( root_cluster, hierarchical_tree)
   
-#Part IV
+##Part IV
   get_gene_name(root_cluster)
-  
-#  #Part III : Thumbnails construction
+#  
+##  #Part III : Thumbnails construction
   TPs = timePoint_hierarchy(17)
   SM = graph.addSubGraph("Small multiples")
   lay = SM.getLayoutProperty("viewLayout")
   draw_timePoint_hierarchy(TPs, SM, root_cluster)
-  #draw_small_multiples(5,TPs,SM,lay)
-  draw_small_multiples_v2(5,TPs,SM,lay)
+  draw_small_multiples(5,TPs,SM,lay)
+#  draw_small_multiples_v2(5,TPs,SM,lay)
+##
 #
-
 #  #Time counter
-#  print "Time elapsed :", time.time() - start, " secondes"
+  print "Time elapsed :", time.time() - start, " secondes"
 #    
 ##  Time elapsed :10.0036051273 secondes -> find_path()
 ##  Time elapsed :103.376773834 secondes -> compute_pathway()
