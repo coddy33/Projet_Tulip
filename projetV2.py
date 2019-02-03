@@ -40,6 +40,8 @@ SOFTWARE.
 """
 
 from tulip import tlp
+import re #regex
+import urllib
 import time
 
 start = time.time()
@@ -48,21 +50,25 @@ start = time.time()
 def preprocessing(gr):
   """
   Affect a pre-treatment to a graph (Size of nodes, color edges, add nodes name)
-  @type gr: Tulip Graph
-  @param gr: Current graph
+  
+  @type gr: tlp.Graph
+  @param gr: current graph
   """
   viewLabel = gr.getStringProperty("viewLabel")
   LabelPosition = gr.getIntegerProperty("viewLabelPosition")
   layout = gr.getLayoutProperty("viewLayout")
   viewSize = gr.getSizeProperty("viewSize")
   viewColor = gr.getColorProperty("viewColor")
+  viewShape = gr.getIntegerProperty("viewShape")
   Locus = gr.getStringProperty("Locus")
+
   green = tlp.Color(0,255,0)
   red = tlp.Color(255,0,0)
   size=(60.0,60.0,60.0)
   for n in graph.getNodes():
     viewLabel[n] = Locus[n]
     viewSize[n] = size
+    viewShape[n] = 14 #circle
     LabelPosition[n] = tlp.LabelPosition.Center
   for e in gr.getEdges():
     properties = gr.getEdgePropertiesValues(e)
@@ -70,9 +76,6 @@ def preprocessing(gr):
       viewColor[e] = green
     else :
       viewColor[e] = red
-  
-
-  
   paramalgo = tlp.getDefaultPluginParameters("FM^3 (OGDF)")
   paramalgo["Node size"]='viewSize'
   gr.applyLayoutAlgorithm("FM^3 (OGDF)",layout,paramalgo)
@@ -81,7 +84,7 @@ def preprocessing(gr):
 #Part II
 def draw_hierarchical_tree(tree, root, current_cluster):
   """
-  Draw the hierarchical tree. Each clusters are represented by a subgraphs. For each clusters add a node 
+  Draw the hierarchical tree. Each clusters are represented by a subgraphs. For each cluster add a node 
   in the tree then fit the edges between the cluster and its parent recursively.
   
   Then, for each current clusters that doesn't have childs draw each genes as nodes and fit it to its cluster.
@@ -89,7 +92,7 @@ def draw_hierarchical_tree(tree, root, current_cluster):
   @type tree: tlp.Graph
   @param tree: graph holding root
   @type current_cluster: tlp.Graph
-  @param current_cluster : a Tulip graph of the hierarchical ########TODO Ben - decrire la recursivite 
+  @param current_cluster : a Tulip graph of the hierarchical tree in recursivity
   @type root: tlp.node
   @param root: root node of the current_cluster
   """
@@ -106,7 +109,9 @@ def apply_radial_algorithm(gr,viewLayout):
   """
   Apply the "Tree Radial" algorithme on gr
   
-  @param gr: Tulip graph 
+  @type gr: tlp.Graph
+  @param gr: current graph
+  @type viewLayout: tlp.LayoutProperty
   @param viewLayout: layout property
   """
   params = tlp.getDefaultPluginParameters("Tree Radial", gr)
@@ -239,13 +244,13 @@ def set_control_points(tree, gene, path, e):
   Recovered coord of control nodes for an edge, and apply on viewlayout of gene  interactions graph
   
   @type tree: tlp.Graph
-  @param tree: Hierarchical tree graph
+  @param tree: hierarchical tree graph
   @type gene: tlp.Graph
-  @param gene: Gene interactions graph
+  @param gene: gene interactions graph
   @type path: list
   @param path: list of shortest path between two nodes
-  @type e: Edge
-  @param e: Edge on which we want coord to control point
+  @type e: edge
+  @param e: edge on which we want coord to control point
   """
   position_vector = []
   for n in path :
@@ -258,7 +263,7 @@ def draw_bundles(gene, tree):
   Construction of edge bundles using the method Cubic-B-spline
   
   @type  gene: tlp.Graph
-  @param gene: Gene interactions graph
+  @param gene: genes interactions graph
   @type  tree: tlp.Graph
   @param tree: hierarchical tree graph
   """
@@ -439,9 +444,50 @@ def draw_small_multiples_v2(nb_col,TPs,SM,lay):
     count=count+1
     lay.translate(tlp.Vec3f(x,y,0),tp)
     
-    
+#Part IV
+def get_gene_name(gr):
+  """
+  query a database to assign to each locus a gene name, a product name, and a condition
   
+  @type gr: tlp.Graph
+  @param gr: current graph
+  """
+  GeneProductSet = "http://regulondb.ccg.unam.mx/menu/download/datasets/files/GeneProductSet.txt"
+  GCSet = "http://regulondb.ccg.unam.mx/menu/download/datasets/files/GCSet.txt"
+  Locus_property = gr.getStringProperty("Locus")
+  name_property = gr.getStringProperty("Gene Name")
+  condition_property = gr.getStringProperty("Condition")
+  product_property = gr.getStringProperty("Product name")
+  file = urllib.urlopen(GeneProductSet)
+  file2 = urllib.urlopen(GCSet)
+  locus = [] 
+  for n in gr.getNodes():
+    locus.append(Locus_property[n])
+  
+  for line in file:
+    L =  line.split("\t")
+    header = re.search("^#.*", line)
+    if L[0] in locus:
+      node = list(Locus_property.getNodesEqualTo(L[0]))[0]
+      if len(L) >= 7:
+        product_property[node] = L[6].rstrip()
+      name_property[node] = L[1]
 
+  file.close()
+  names = []
+  for n in gr.getNodes():
+    names.append(name_property[n])
+
+  for line in file2:
+    L =  line.split("\t")
+    header = re.search("^#.*", line)
+    if header:
+      pass
+    elif L[5] in names : 
+      node = name_property.getNodesEqualTo(L[5])
+      condition_property[list(node)[0]] = L[1]
+       
+  file2.close()
   
 
 def main(graph):  
@@ -457,6 +503,9 @@ def main(graph):
   draw_hierarchical_tree(hierarchical_tree, root, root_cluster)
   apply_radial_algorithm(hierarchical_tree,viewLayout)
   draw_bundles( root_cluster, hierarchical_tree)
+  
+#Part IV
+  get_gene_name(root_cluster)
   
 #  #Part III : Thumbnails construction
   TPs = timePoint_hierarchy(17)
