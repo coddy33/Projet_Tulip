@@ -1,4 +1,4 @@
-# Gene Expression Visual Investigation
+# Gene Expression Visual Investigation with Tulip
 
 # Introduction
 
@@ -17,27 +17,35 @@ All the information above were given for 17 different Timpe Points (TP)
 # Results 
 
 ![](img/hierarchical_graph.png)
+
 *Visualization of the hierarchical tree with the radial algorithm implemented with Tulip*
 
 ![](img/gene_interaction.png)
+
 *Gene interaction*
 
 ![](img/path.png)
+
 *Calculation of shortest path between Nodes and edges (see implemented functions: find_path(), BFS_search())*
 
 ![](img/small_multiples.png)
+
 *Small Multiples visualization of the gene expression Time Points*
 
 ![](img/TP5a7.png)
+
 *Gene expression level for TP5, 6, 7*
 
 ![](img/TP7a13.png)
+
 *Gene expression level for TP7, 11, 13*
 
 ![](img/TP17.png)
+
 *Gene expression level for TP13, 14, 17*
 
 ![](img/Lacy.png)
+
 *LacY & LacZ gene expression at TP11*
 
 # Conclusion 
@@ -55,7 +63,7 @@ The analysis of Escherichia coli gene expression, focusing on growth in a glucos
 
 ## Language & Framework
 
-- Tulip (v5.2.1)
+- [Tulip (v5.2.1)]([url](https://tulip.labri.fr/Documentation/current/tulip-python/html/index.html#)https://tulip.labri.fr/Documentation/current/tulip-python/html/index.html#)
 - Python 2.7
   - urllib (standard library)
   - regex (standard library)
@@ -76,4 +84,9 @@ epydoc [ --pdf] input_file.py [-o] output
 ```
 
 Follow this [link](https://coddy33.github.io/Tulip_project_doc/) to find the documenation.
+
+# Sources 
+
+- [Tulip Python 5.7.3 documentation]([url](https://tulip.labri.fr/Documentation/current/tulip-python/html/index.html#)https://tulip.labri.fr/Documentation/current/tulip-python/html/index.html#)
+
 
